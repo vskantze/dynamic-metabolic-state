@@ -1,0 +1,17 @@
+[project]
+name = "dynamic-metabolic-state"
+version = "0.1.0"
+description = "Context-aware mechanistic glucose modeling"
+readme = "README.md"
+requires-python = ">=3.14"
+
+dependencies = [
+    "jax",
+    "jaxlib",
+    "numpy",
+    "pandas",
+    "matplotlib",
+    "seaborn",
+    "ipykernel",
+    "diffrax>=0.7.2",
+]
