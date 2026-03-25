@@ -3,16 +3,14 @@ from glucose_model.model.absorption import Ra
 
 def dynamics(t, y, args):
     G, X = y
-    params, meal, SI = args
+    params, meal, SI, f, p2, beta_protein, alpha_fat = args
 
-    SG = params["SG"]
-    p2 = params["p2"]
-    p3 = params["p3"]
-    Gb = params["Gb"]
+    p3 = params["global"]["p3"]
+    Gb = params["global"]["Gb"]
+    SG = params["global"]["SG"]
+    Ra_t = Ra(t, meal, params, alpha_fat)
 
-    Ra_t = Ra(t, meal, params)
-
-    dGdt = - (SG + SI * X) * (G - Gb) + Ra_t
-    dXdt = -p2 * X + p3 * (G - Gb)
+    dGdt = -SG * (G-Gb) - SI * X + f * Ra_t
+    dXdt = -p2 * X + p3 * G + beta_protein * meal["protein"]
 
     return jnp.array([dGdt, dXdt])

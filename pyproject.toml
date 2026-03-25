@@ -14,4 +14,6 @@ dependencies = [
     "seaborn",
     "ipykernel",
     "diffrax>=0.7.2",
+    "statsmodels>=0.14.6",
+    "optax>=0.2.8",
 ]
