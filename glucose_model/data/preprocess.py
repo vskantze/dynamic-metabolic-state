@@ -51,6 +51,12 @@ def build_meal_trajectories(df):
             # for later merging
             "day": g["Day number"].iloc[0],
         }
+        
+        # Skip responses not reaching above baseline
+        n_below_baseline = sum( (sample["glucose"] - sample["glucose"][0])<0 )
+        threshold = 0.8
+        if ( n_below_baseline > threshold * len(sample["glucose"]) ):
+            continue
 
         meals.append(sample)
 

@@ -9,12 +9,9 @@ def simulate(params, meal, context, t_eval, person_idx):
     
     SI_base = params["individual"]["SI_base"][person_idx]
     z = compute_z(context, params)
-    SI = SI_base * (1 + z)
+    SI = SI_base * jnp.exp(z)
 
-    f = params["individual"]["f"][person_idx]
-    p2 = params["individual"]["p2"][person_idx]
-    beta_protein = params["individual"]["beta_protein"][person_idx]
-    alpha_fat = params["individual"]["alpha_fat"][person_idx]
+
     y0 = jnp.array([params["global"]["Gb"], 0.0])
 
     term = dfx.ODETerm(dynamics)
@@ -26,7 +23,7 @@ def simulate(params, meal, context, t_eval, person_idx):
         t1=t_eval[-1],
         dt0=1.0,
         y0=y0,
-        args=(params, meal, SI, f, p2, beta_protein, alpha_fat),
+        args=(params, meal, SI, person_idx),
         saveat=dfx.SaveAt(ts=t_eval),
     )
 

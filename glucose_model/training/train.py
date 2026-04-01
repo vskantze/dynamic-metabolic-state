@@ -11,6 +11,7 @@ from glucose_model.model.model import forward_batch
 from glucose_model.data.preprocess import clean_response, clean_sleep, build_meal_trajectories, aggregate_activity, attach_context
 from glucose_model.training.loss import loss_fn
 import matplotlib.pyplot as plt
+from collections import defaultdict
 
 import optax
 
@@ -60,7 +61,7 @@ optimizer = optax.adam(1e-3)
 opt_state = optimizer.init(params)
 
 for epoch in range(500):
-    indices = np.random.choice(len(dataset), size=8, replace=False)
+    indices = np.random.choice(len(dataset), size=200, replace=False)
 
     batch = create_batch(dataset, indices)
 
@@ -76,12 +77,34 @@ for epoch in range(500):
 
 pred = forward_batch(params, batch)
 
-for idx, _ in enumerate(pred):
-    plt.plot(batch["time"][idx], batch["glucose"][idx], c="k", label="true")
-    plt.plot(batch["time"][idx], pred[idx],'--r', label="pred")
+fig, ax = plt.subplots(2,1)
+residuals = defaultdict(list)
 
+for idx, _ in enumerate(pred):
+    if idx == 0:
+        ax[0].plot(batch["time"][idx], batch["glucose"][idx], c="k", label="true")
+        ax[0].plot(batch["time"][idx], pred[idx],'--r', label="pred")
+    else:
+        ax[0].plot(batch["time"][idx], batch["glucose"][idx], c="k")
+        ax[0].plot(batch["time"][idx], pred[idx],'--r')
+    
+    res = batch["glucose"][idx] - pred[idx]
+    for i, t in enumerate(batch["time"][idx].tolist()):
+        key = str(round(t,0))
+        residuals[key].append(res[i].item())
+
+df_residuals = pd.DataFrame(residuals)
+mean_traj = df_residuals.mean(0)
+time_traj = [float(a) for a in mean_traj.index.values]
+ax[1].plot(time_traj, mean_traj.values,"--k", label= "Mean")
+ax[1].fill_between(time_traj, mean_traj - df_residuals.std(0),
+           mean_traj + df_residuals.std(0), label= "Std")
 plt.legend()
 plt.title("Model fit")
 plt.show()
 
-print(params)
+for d, v in params["global"].items():
+    print(f"Global param {d}:", v)
+
+for d, v in params["individual"].items():
+    print(f"Individual {d}, mean:", v.mean(), "std:", v.std())
