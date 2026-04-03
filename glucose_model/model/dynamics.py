@@ -1,4 +1,5 @@
 import jax.numpy as jnp
+import jax.random as random
 from glucose_model.model.absorption import Ra
 
 def dynamics(t, y, args):
@@ -12,7 +13,9 @@ def dynamics(t, y, args):
     p3 = params["global"]["p3"]
     Gb = params["global"]["Gb"]
     SG = params["global"]["SG"]
-    Ra_t = Ra(t, meal, params, person_idx)
+
+    key = random.PRNGKey(42)
+    Ra_t, key = Ra(t, meal, params, person_idx, key)
 
     dGdt = -SG * (G-Gb) - SI * X + f * Ra_t
     dXdt = -p2 * X + p3 * G + beta_protein * meal["protein"]/100

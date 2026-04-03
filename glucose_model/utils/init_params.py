@@ -24,7 +24,8 @@ def init_params(person_ids):
             "tau_slow_base": 80.0,
             "w": 0.6,
 
-            "time_meal": 30
+            "time_meal": 30.0,
+            "time_std": 5.0,
         },
 
         "individual": {
