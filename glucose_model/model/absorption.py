@@ -1,7 +1,7 @@
 import jax.numpy as jnp
 import jax.random as random
 
-def Ra(t, meal, params, person_idx, key):
+def Ra(t, meal, params, person_idx, key, n_samples):
     carbs = meal["carbs"]
     fat = meal["fat"]
 
@@ -14,7 +14,7 @@ def Ra(t, meal, params, person_idx, key):
     w = jnp.take(params["individual"]["w"], person_idx)
 
 
-    t_meal_i = random.normal(key, shape=(100,))*params["global"]["time_std"] + params["global"]["time_meal"]
+    t_meal_i = random.normal(key, shape=(n_samples,))*params["global"]["time_std"] + params["global"]["time_meal"]
     t_pos = jnp.maximum(t-t_meal_i, 0)
 
     fast = (t_pos / tau_fast) * jnp.exp(-t_pos / tau_fast)

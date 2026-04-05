@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import yaml
 from glucose_model.data.preprocess import (
     interpolate_meal,
     normalize_context
@@ -18,6 +19,7 @@ import optax
 from pathlib import Path
 import os 
 
+# Read data
 ROOT_DIR = Path.cwd()
 df_activity = pd.read_csv(os.path.join(ROOT_DIR, "data/processed/activity_data.csv"))
 print( "Activity data: \n", df_activity.head() )
@@ -28,6 +30,13 @@ print("Sleep data: \n" ,df_sleep.head())
 df_response = pd.read_csv(os.path.join(ROOT_DIR, "data/processed/t2d_long_format.csv"))
 print("Response data: \n", df_response.head())
 print("Response cols: \n", list(df_response.columns))
+
+# Read config
+with open(os.path.join(ROOT_DIR, "glucose_model/utils/config.yaml"), "r") as f:
+    config = yaml.safe_load(f)
+print(config)
+n_samples = config["n_samples"]
+
 
 # Preprocess
 df_response = clean_response(df_response)
@@ -60,13 +69,13 @@ params = init_params(person_ids)
 optimizer = optax.adam(1e-3)
 opt_state = optimizer.init(params)
 
-for epoch in range(500):
+for epoch in range(200):
     indices = np.random.choice(len(dataset), size=200, replace=False)
 
     batch = create_batch(dataset, indices)
 
     params, opt_state, loss = train_step(
-        params, opt_state, batch
+        params, opt_state, batch, n_samples
     )
 
     if epoch % 10 == 0:
@@ -75,7 +84,7 @@ for epoch in range(500):
 
 
 
-pred = forward_batch(params, batch)
+pred = forward_batch(params, batch, n_samples)
 
 fig, ax = plt.subplots(2,1)
 residuals = defaultdict(list)

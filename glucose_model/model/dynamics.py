@@ -4,7 +4,7 @@ from glucose_model.model.absorption import Ra
 
 def dynamics(t, y, args):
     G, X = y
-    params, meal, SI, person_idx = args
+    params, meal, SI, person_idx, n_samples = args
 
     f = jnp.take(params["individual"]["f"], person_idx)
     p2 = jnp.take(params["individual"]["p2"], person_idx)
@@ -15,7 +15,7 @@ def dynamics(t, y, args):
     SG = params["global"]["SG"]
 
     key = random.PRNGKey(42)
-    Ra_t, key = Ra(t, meal, params, person_idx, key)
+    Ra_t, key = Ra(t, meal, params, person_idx, key, n_samples)
 
     dGdt = -SG * (G-Gb) - SI * X + f * Ra_t
     dXdt = -p2 * X + p3 * G + beta_protein * meal["protein"]/100
