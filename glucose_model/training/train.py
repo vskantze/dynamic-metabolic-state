@@ -34,7 +34,6 @@ print("Response cols: \n", list(df_response.columns))
 # Read config
 with open(os.path.join(ROOT_DIR, "glucose_model/utils/config.yaml"), "r") as f:
     config = yaml.safe_load(f)
-print(config)
 n_samples = config["n_samples"]
 
 
@@ -69,13 +68,13 @@ params = init_params(person_ids)
 optimizer = optax.adam(1e-3)
 opt_state = optimizer.init(params)
 
-for epoch in range(200):
+for epoch in range(300):
     indices = np.random.choice(len(dataset), size=200, replace=False)
 
     batch = create_batch(dataset, indices)
 
     params, opt_state, loss = train_step(
-        params, opt_state, batch, n_samples
+        params, opt_state, batch
     )
 
     if epoch % 10 == 0:
@@ -84,7 +83,7 @@ for epoch in range(200):
 
 
 
-pred = forward_batch(params, batch, n_samples)
+pred = forward_batch(params, batch)
 
 fig, ax = plt.subplots(2,1)
 residuals = defaultdict(list)
@@ -93,23 +92,29 @@ for idx, _ in enumerate(pred):
     if idx == 0:
         ax[0].plot(batch["time"][idx], batch["glucose"][idx], c="k", label="true")
         ax[0].plot(batch["time"][idx], pred[idx],'--r', label="pred")
+        ax[0].fill_between(batch["time"][idx], pred[idx] - 2*params["global"]["sigma"], 
+                           pred[idx] + 2*params["global"]["sigma"])
     else:
         ax[0].plot(batch["time"][idx], batch["glucose"][idx], c="k")
         ax[0].plot(batch["time"][idx], pred[idx],'--r')
+        ax[0].fill_between(batch["time"][idx], pred[idx] - 2*params["global"]["sigma"], 
+                           pred[idx] + 2*params["global"]["sigma"])
     
     res = batch["glucose"][idx] - pred[idx]
     for i, t in enumerate(batch["time"][idx].tolist()):
         key = str(round(t,0))
         residuals[key].append(res[i].item())
-
+ax[0].set_title("Model fit")
+ax[0].legend()
 df_residuals = pd.DataFrame(residuals)
 mean_traj = df_residuals.mean(0)
 time_traj = [float(a) for a in mean_traj.index.values]
 ax[1].plot(time_traj, mean_traj.values,"--k", label= "Mean")
 ax[1].fill_between(time_traj, mean_traj - df_residuals.std(0),
            mean_traj + df_residuals.std(0), label= "Std")
-plt.legend()
-plt.title("Model fit")
+ax[1].set_title("Residuals ")
+ax[1].legend()
+
 plt.show()
 
 for d, v in params["global"].items():

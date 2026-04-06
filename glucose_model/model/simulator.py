@@ -3,9 +3,8 @@ import jax.numpy as jnp
 
 from glucose_model.model.dynamics import dynamics
 from glucose_model.model.metabolic_state import compute_z
-from glucose_model.model.parameters import compute_SI
 
-def simulate(params, meal, context, t_eval, person_idx, n_samples):
+def simulate(params, meal, context, t_eval, person_idx):
     
     SI_base = params["individual"]["SI_base"][person_idx]
     z = compute_z(context, params)
@@ -23,7 +22,7 @@ def simulate(params, meal, context, t_eval, person_idx, n_samples):
         t1=t_eval[-1],
         dt0=1.0,
         y0=y0,
-        args=(params, meal, SI, person_idx, n_samples),
+        args=(params, meal, SI, person_idx),
         saveat=dfx.SaveAt(ts=t_eval),
     )
 

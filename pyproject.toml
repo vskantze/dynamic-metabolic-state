@@ -3,18 +3,19 @@ name = "dynamic-metabolic-state"
 version = "0.1.0"
 description = "Context-aware mechanistic glucose modeling"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = "==3.11.*"
 
 dependencies = [
-    "jax",
-    "jaxlib",
-    "numpy",
+    "numpy<2",
+    "scipy<1.11",
+    "jax==0.4.23",
+    "optax==0.1.7",
+    "diffrax==0.4.1",
     "pandas",
     "matplotlib",
     "seaborn",
     "ipykernel",
-    "diffrax>=0.7.2",
     "statsmodels>=0.14.6",
-    "optax>=0.2.8",
     "pyyaml>=6.0.3",
+    "jaxlib==0.4.23",
 ]

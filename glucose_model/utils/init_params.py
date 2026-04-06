@@ -10,6 +10,9 @@ def init_params(person_ids):
 
     params = {
         "global": {
+
+            "sigma": 20.0,
+
             "z_W": jnp.ones(5) * 0.2,
             "z_b": 0.0,
 
@@ -24,8 +27,8 @@ def init_params(person_ids):
             "tau_slow_base": 80.0,
             "w": 0.6,
 
-            "time_meal": 30.0,
-            "time_std": 5.0,
+            "timing_logits": jnp.array([-1.0, 2.0, -1.0])
+
         },
 
         "individual": {
